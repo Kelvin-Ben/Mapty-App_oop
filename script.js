@@ -1,7 +1,5 @@
 "use strict";
 
-// prettier-ignore
-const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
 
 const form = document.querySelector(".form");
 const containerWorkouts = document.querySelector(".workouts");
@@ -20,13 +18,21 @@ class Workkout {
     this.distance = distance; // distance in km
     this.duration = duration; // time in minutes
   }
+
+  _setDescription() {
+      // prettier-ignore
+      const months = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December'];
+      this.description = `${this.type[0].toUppercase()}${this.type.slice(1)} on ${months[this.date.getMonth()]} ${this.date.getDate()}`;
+  }
 }
 
 class Running extends Workkout {
+  type = 'running'
   constructor(distance, duration, coords, cadence) {
     super(distance, duration, coords);
     this.cadence = cadence;
     this.calcPace();
+    this._setDescription();
   }
 
   calcPace() {
@@ -35,10 +41,12 @@ class Running extends Workkout {
   }
 }
 class Cycling extends Workkout {
+  type = "cycling"
   constructor(coords, distance, duration, elevationGain) {
     super(coords, distance, duration);
     this.elevationGain = elevationGain;
     this.calcSpeed();
+    this._setDescription();
   }
 
   calcSpeed() {
@@ -133,10 +141,19 @@ class App {
     console.log(workout);
 
     // Render workout on the map as marker
-    // this.renderWorkoutmarker(workout);
+    this._renderWorkoutMarker(workout);
 
     // Render workout on list
-    L.marker([lat, lng])
+    
+    // clear inputs
+    inputCadence.value =
+      inputDistance.value =
+      inputDuration.value =
+      inputElevation.value =
+        "";
+  }
+    _renderWorkoutMarker(workout) {
+    L.marker(workout.coords)
       .addTo(this.#map)
       .bindPopup(
         L.popup({
@@ -145,17 +162,11 @@ class App {
           closeButton: true,
           autoClose: false,
           closeOnClick: false,
-          className: `${type}-popup`, //deifined within css
+          className: `${workout.type}-popup`, //deifined within css
         })
       )
       .setPopupContent("Workout")
       .openPopup();
-    // clear inputs
-    inputCadence.value =
-      inputDistance.value =
-      inputDuration.value =
-      inputElevation.value =
-        "";
-  }
+        }
 }
 const app = new App();
